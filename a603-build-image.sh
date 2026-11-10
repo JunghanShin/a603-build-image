@@ -542,5 +542,5 @@ if [[ "$with_board" -eq 1 ]]; then
 fi
 
 echo
-echo "Images are ready. Turn the board off, short REC to GND, power it on until lsusb -t shows 480 Mbps, then run:"
+echo "Images are ready. Turn the board off, short W7 pin 3 (FORCE_RECOVERY) to pin 4 (GND), power it on until lsusb -t shows 480 Mbps, then run:"
 echo "  a603-flash-image.sh -w ${WORK_DIR}"

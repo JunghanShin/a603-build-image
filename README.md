@@ -26,6 +26,103 @@ a603-flash-image.sh   (보드 REC 모드, USB 연결)
 
 Holybro 보드용 [holybro-build-image](https://github.com/JunghanShin/holybro-build-image)(JetPack 6.2.2)와 구조가 같습니다. 보드마다 지원하는 JetPack이 달라 저장소를 나눴습니다.
 
+## 빠른 시작 (처음부터 첫 부팅까지)
+
+이 순서대로 따라 하면 됩니다. 모든 명령은 **Ubuntu 22.04 터미널**(실제 PC 또는 VMware·VirtualBox 가상 머신)에서 실행합니다. 작업 폴더는 `~/a603-work`입니다. 각 단계의 자세한 설명은 아래 절과 [a603-flash-image](https://github.com/JunghanShin/a603-flash-image) README에 있습니다.
+
+### 0. 준비 (처음 한 번)
+
+```bash
+sudo apt update
+```
+```bash
+sudo apt install -y git
+```
+```bash
+mkdir -p ~/a603-work
+```
+```bash
+cd ~ && git clone https://github.com/JunghanShin/a603-build-image.git
+```
+```bash
+cd ~ && git clone https://github.com/JunghanShin/a603-flash-image.git
+```
+
+가상 머신이면 NVIDIA USB 장치가 가상 머신으로 자동 연결되게 미리 설정합니다([가상 머신 USB 설정](https://github.com/JunghanShin/holybro-build-image#가상-머신-virtualbox-vmware)).
+
+### 1. Seeed 패치 받기 (직접 다운로드)
+
+1. [Seeed A603 플래시 문서](https://wiki.seeedstudio.com/reComputer_A603_Flash_System/)의 드라이버 표에서 **JP6.2** 행의 `603_jp62.tar.gz`를 받습니다. 같은 행의 SHA256 값도 복사해 둡니다.
+2. 받은 파일을 작업 폴더로 옮깁니다(압축은 풀지 않음).
+   ```bash
+   mv ~/Downloads/603_jp62.tar.gz ~/a603-work/
+   ```
+
+NVIDIA BSP, 루트 파일 시스템, JetPack 패키지는 스크립트가 받습니다. 직접 받는 것은 이 패치 하나입니다.
+
+### 2. 이미지 생성 (보드 연결 안 함, 1~2시간 이상)
+
+```bash
+cd ~ && ./a603-build-image/a603-build-image.sh -w ~/a603-work
+```
+
+- 중간에 `sudo` 비밀번호를 묻습니다.
+- 패치의 SHA256까지 확인하려면 `PATCH_SHA256=<복사한 값>`을 앞에 붙여 실행합니다.
+- 끝나면 이 파일이 있어야 합니다.
+  ```bash
+  ls -lh ~/a603-work/Linux_for_Tegra/tools/kernel_flash/images/external/system.img
+  ```
+
+### 3. 보드를 리커버리 모드로
+
+1. 보드 전원을 빼고, **NVMe SSD가 M.2 Key M 슬롯에 꽂혀 있는지** 확인합니다(전원을 켠 뒤 꽂으면 인식 안 됨).
+2. 헤더 **W7의 3번(FORCE_RECOVERY)과 4번(GND)을 쇼트**합니다. A603에는 리커버리 버튼이 없습니다.
+3. PC와 보드의 **micro-USB**를 데이터 케이블로 연결하고 전원을 넣습니다.
+4. 가상 머신이면 VMware 메뉴 **VM → Removable Devices → NVIDIA APX → Connect**로 장치를 넘깁니다.
+5. 복구 장치가 **480M**으로 잡혔는지 확인합니다. Orin NX 16GB는 `0955:7323`, 8GB는 `0955:7423`입니다.
+   ```bash
+   lsusb | grep 0955
+   ```
+   ```bash
+   lsusb -t
+   ```
+
+### 4. 보드에 쓰기 (10~20분)
+
+```bash
+cd ~ && ./a603-flash-image/a603-flash-image.sh -w ~/a603-work
+```
+
+- 다른 시스템이 들어 있던 SSD라면 `--erase`를 붙입니다.
+- 쓰는 도중 보드가 다시 부팅하며 USB 장치가 새로 잡힙니다. 연결 대상을 물으면 **가상 머신**을 고릅니다.
+- `Flash finished`가 나오면 성공입니다.
+
+### 5. 첫 부팅과 확인
+
+1. 전원을 빼고 **W7 쇼트를 제거**한 뒤 전원을 넣습니다.
+2. 이더넷(DHCP로 받은 IP)이나 micro-USB(`192.168.55.1`, A603에서는 아직 미확인)로 접속합니다. 비밀번호는 `roqkf`입니다.
+   ```bash
+   ssh dev@192.168.55.1
+   ```
+3. 보드에서 확인합니다. JetPack 두 패키지 모두 `6.2+b77`, CAN은 `can0`이 1000000으로 켜져 있어야 합니다.
+   ```bash
+   dpkg-query -W nvidia-jetpack-runtime nvidia-jetpack-dev
+   ```
+   ```bash
+   can-setup
+   ```
+
+### 막혔을 때 보여 줄 로그
+
+| 단계 | 로그 |
+|---|---|
+| 이미지 생성 | `~/a603-work/build-image.log` |
+| 쓰기 | `~/a603-work/flash-image.log`, `~/a603-work/Linux_for_Tegra/initrdlog/` |
+
+```bash
+tail -n 50 ~/a603-work/build-image.log
+```
+
 ## 준비
 
 | 항목 | 내용 |
@@ -139,7 +236,7 @@ sudo can-setup off
 
 식별값은 캐리어가 아니라 **모듈** 값이라, 기본값은 holybro-build-image와 같은 Orin NX 16GB 값입니다. 다른 모듈(예: Orin NX 8GB)이거나 처음 쓰는 모듈이면 한 번 읽어 확인합니다. 보드에는 아무것도 쓰지 않습니다.
 
-1. 보드 전원을 끄고 A603의 **REC 핀과 GND를 쇼트**합니다.
+1. 보드 전원을 끄고 A603 헤더 **W7의 3번(FORCE_RECOVERY)과 4번(GND)을 쇼트**합니다.
 2. PC와 보드의 micro-USB를 연결하고 전원을 켭니다.
 3. NVIDIA 장치(`0955:7323` 등)가 `480M`으로 보이는지 확인합니다.
    ```bash
