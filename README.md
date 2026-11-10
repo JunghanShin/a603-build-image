@@ -52,7 +52,7 @@ cd ~ && git clone https://github.com/JunghanShin/a603-flash-image.git
 
 ### 1. Seeed 패치 받기 (직접 다운로드)
 
-1. [Seeed A603 플래시 문서](https://wiki.seeedstudio.com/reComputer_A603_Flash_System/)의 드라이버 표에서 **JP6.2** 행의 `603_jp62.tar.gz`를 받습니다. 같은 행의 SHA256 값도 복사해 둡니다.
+1. **[603_jp62.tar.gz 받기 (Seeed SharePoint)](https://seeedstudio88-my.sharepoint.com/personal/youjiang_yu_seeedstudio88_onmicrosoft_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fyoujiang%5Fyu%5Fseeedstudio88%5Fonmicrosoft%5Fcom%2FDocuments%2FJetson%2DImages%2FA603%2F603%5Fjp62%2Etar%2Egz&parent=%2Fpersonal%2Fyoujiang%5Fyu%5Fseeedstudio88%5Fonmicrosoft%5Fcom%2FDocuments%2FJetson%2DImages%2FA603&ga=1)** 링크를 열고 **다운로드**를 누릅니다. 링크가 열리지 않으면 [Seeed A603 플래시 문서](https://wiki.seeedstudio.com/reComputer_A603_Flash_System/)의 드라이버 표에서 **JP6.2** 행의 링크로 받습니다. SHA256 값도 그 표에 있습니다.
 2. 받은 파일을 작업 폴더로 옮깁니다(압축은 풀지 않음).
    ```bash
    mv ~/Downloads/603_jp62.tar.gz ~/a603-work/
@@ -137,7 +137,7 @@ tail -n 50 ~/a603-work/build-image.log
 
 Seeed는 A603 드라이버를 SharePoint로 배포해서 스크립트가 자동으로 받을 수 없습니다.
 
-1. [Seeed A603 플래시 문서](https://wiki.seeedstudio.com/reComputer_A603_Flash_System/)의 드라이버 표에서 **JP6.2** 행의 `603_jp62.tar.gz`를 받습니다.
+1. **[603_jp62.tar.gz 받기 (Seeed SharePoint)](https://seeedstudio88-my.sharepoint.com/personal/youjiang_yu_seeedstudio88_onmicrosoft_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fyoujiang%5Fyu%5Fseeedstudio88%5Fonmicrosoft%5Fcom%2FDocuments%2FJetson%2DImages%2FA603%2F603%5Fjp62%2Etar%2Egz&parent=%2Fpersonal%2Fyoujiang%5Fyu%5Fseeedstudio88%5Fonmicrosoft%5Fcom%2FDocuments%2FJetson%2DImages%2FA603&ga=1)** 링크에서 받습니다. Seeed가 링크를 바꾸면 [Seeed A603 플래시 문서](https://wiki.seeedstudio.com/reComputer_A603_Flash_System/)의 드라이버 표에서 **JP6.2** 행의 `603_jp62.tar.gz`를 받습니다.
 2. 작업 폴더(예: `~/a603-work`)에 그대로 둡니다. 압축은 풀지 않습니다.
 3. 같은 문서의 SHA256 값으로 확인하려면 `PATCH_SHA256`을 넘깁니다. 넘기지 않으면 계산한 값만 출력합니다.
    ```bash
